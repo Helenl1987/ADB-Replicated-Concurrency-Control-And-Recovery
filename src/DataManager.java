@@ -50,8 +50,8 @@ public class DataManager {
 		}
 	}
 	
-	public final int VARIABLECNT = 20;
-	public final int SITECNT = 10;
+	public final static int VARIABLECNT = 20;
+	public final static int SITECNT = 10;
 	
 	public int siteID;
 	public SiteStatus siteStatus;
