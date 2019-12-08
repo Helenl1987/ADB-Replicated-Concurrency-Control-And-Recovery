@@ -7,6 +7,92 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 
+/*
+ * Author: Jiahui Li (jl10005)
+ * Date: 2019-12-08
+ * Description: DataManager class to manager data sites       
+ *
+ * 1. Name: DataManager (constructor)
+ * 	  Input: siteID
+ *    
+ * 2. Name: Fail
+ * 	  Input: siteID
+ *    Description: set site status and clear local fields
+ *    
+ * 3. Name: Recover
+ * 	  Input: siteID
+ *    Description: set site status and reset local fields
+ *    
+ * 4. Name: DumpAll
+ *    Description: output for a site
+ *    
+ * 5. Name: DumpOne
+ * 	  Input: variableID
+ *    Description: output for a variable
+ *    
+ * 6. Name: Commit
+ * 	  Input: transactionID, time stamp
+ *    Description: commit a transaction
+ *    Side Effects: call ReassignLocks
+ *    
+ * 7. Name: Abort
+ * 	  Input: transactionID
+ *    Description: abort a transaction
+ *    Side Effects: call ReassignLocks
+ *       
+ * 8. Name: ReadLockCheck
+ * 	  Input: transactionID, variableID
+ *    Output: can get read lock or not
+ *    Description: check whether the transaction can get the read lock for the variable
+ *      
+ * 9. Name: AcquireReadLock
+ * 	  Input: transactionID, variableID
+ *    Output: successfully got read lock or not 
+ *    Description: try to get read lock
+ *          
+ * 10. Name: WriteLockCheck
+ * 	  Input: transactionID, variableID
+ *    Output: can get write lock or not
+ *    Description: check whether the transaction can get the write lock for the variable
+ *      
+ * 11. Name: AcquireWriteLock
+ * 	  Input: transactionID, variableID
+ *    Output: successfully got write lock or not
+ *    Description: try to get write lock
+ *    
+ * 12. Name: Read
+ * 	  Input: operation
+ *    Output: OperationResponse
+ *    Description: execute read
+ *        
+ * 13. Name: ReadOnly
+ * 	  Input: operation
+ *    Output: OperationResponse
+ *    Description: execute read only
+ *           
+ * 14. Name: Write
+ * 	  Input: operation
+ *    Output: OperationResponse
+ *    Description: execute write
+ *    
+ * 15. Name: ReassignLocks
+ *     Description: check waiting transaction can get locks or not after some transactions committed or aborted
+ *    
+ * 16. Name: VTConflict
+ * 	  Input: VariableLockNode, TransactionLockNode
+ *    Output: OperationResponse
+ *    Description: check conflicts on a variable between a waiting transaction and the transactions that are currently holding locks for this variable
+ *    
+ * 17. Name: TTConflict
+ * 	  Input: VariableLockNode, TransactionLockNode
+ *    Output: OperationResponse
+ *    Description: check conflicts on a variable between two waiting transactions
+ *    
+ * 18. Name: GenWaitGraph
+ *    Output: wait graph
+ *    Description: generate waiting graphs for all the transactions based on the locking-holding information
+ * */
+
 public class DataManager {
 	public enum SiteStatus {
 		UP,

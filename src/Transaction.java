@@ -1,5 +1,11 @@
 import java.util.HashSet;
 
+/*
+ * Author: Zimo Li (zl2521)
+ * Date: 2019-12-08
+ * Description: Transaction class
+ * */
+
 public class Transaction {
 	private int startTime;
 	private boolean isReadOnly;

@@ -3,6 +3,12 @@ import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.InputStreamReader;
 
+/*
+ * Author: Zimo Li (zl2521), Jiahui Li (jl10005)
+ * Date: 2019-12-08
+ * Description: application starting point 
+ * */
+
 public class App {
 	public static void main(String args[]) {
 		DataManager[] DM = new DataManager[DataManager.SITECNT+1];

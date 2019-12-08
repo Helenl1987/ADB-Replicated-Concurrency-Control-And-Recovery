@@ -1,3 +1,8 @@
+/*
+ * Author: Zimo Li (zl2521), Jiahui Li (jl10005)
+ * Date: 2019-12-06
+ * Description: Operation class
+ * */
 public class Operation {
     public enum OperationType {
         READ,

@@ -5,6 +5,75 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 
+
+/*
+ * Author: Zimo Li (zl2521)
+ * Date: 2019-12-08
+ * Description: TransactionManager class that interpret input and execute commands
+ * 
+ * 1. Name: TransactionManager (constructor)
+ * 	  Input: DataManager array for each site
+ *    
+ * 2. Name: Run
+ *    Description: simulate starting point for execution
+ *   
+ * 3. Name: ExecuteReadWrite
+ *    Description: execute reads / writes
+ *     
+ * 4. Name: Fail
+ * 	  Input: siteID
+ *    Description: call DataManager.Fail
+ *    
+ * 5. Name: Recover
+ * 	  Input: siteID
+ *    Description: call DataManager.Recover
+ *    
+ * 6. Name: DumpAll
+ *    Description: call DataManager.DumpAll for every site
+ *    
+ * 7. Name: DumpSite
+ * 	  Input: siteID
+ *    Description: call DataManager.DumpAll for siteID
+ *     
+ * 8. Name: DumpItem
+ * 	  Input: variableID
+ *    Description: call DataManager.DumpOne for variableID
+ *        
+ * 9. Name: Abort
+ * 	  Input: transactionID
+ *    Description: call DataManager.Abort for every site that transaction associated with
+ *      
+ * 10. Name: Begin
+ * 	  Input: transactionID, isReadOnly
+ *    Description: start new transaction
+ *    
+ * 11. Name: Finish
+ * 	  Input: transactionID
+ *    Description: call DataManager.Commit if the transaction will commit and remove it from transaction list
+ *       
+ * 12. Name: Read
+ * 	  Input: operation
+ *    Output: success or not 
+ *    Description: call DataManager.AcquireReadLock and DataManager.Read
+ *     
+ * 13. Name: ReadOnly
+ * 	  Input: operation
+ *    Output: success or not
+ *    Description: call DataManager.ReadOnly
+ *     
+ * 14. Name: Write
+ * 	  Input: operation
+ *    Output: success or not
+ *    Description: call DataManager.AcquireWriteLock and DataManager.Write
+ *         
+ * 15. Name: hasCycle
+ * 	  Input: current node, root node, graph, path
+ *    Output: has cycle or not
+ *         
+ * 16. Name: DetectDeadLock
+ *    Output: has deadlock or not
+ *    Description: Abort the youngest transaction that caused deadlock if any
+ * */
 public class TransactionManager {
 	private int time;
 	private DataManager[] DM;
