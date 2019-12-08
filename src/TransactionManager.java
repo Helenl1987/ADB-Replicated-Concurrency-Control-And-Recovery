@@ -118,7 +118,7 @@ public class TransactionManager {
 			int variableID = ParseID(params[1]);
 			Transaction curTrans = transactions.get(transactionID);
 			if(curTrans.willAbort) {
-				System.out.println("DEBUG: About to abort so ignore this read command when parsing");
+				//System.out.println("DEBUG: About to abort so ignore this read command when parsing");
 				return;
 			}
 			Operation op = new Operation(transactionID, variableID, Operation.OperationType.READ, -1, curTrans.getStartTime());
@@ -133,7 +133,7 @@ public class TransactionManager {
 			int value = Integer.parseInt(params[2]);
 			Transaction curTrans = transactions.get(transactionID);
 			if(curTrans.willAbort) {
-				System.out.println("DEBUG: About to abort so ignore this write command when parsing");
+				//System.out.println("DEBUG: About to abort so ignore this write command when parsing");
 				return;
 			}
 			Operation op = new Operation(transactionID, variableID, Operation.OperationType.WRITE, value, curTrans.getStartTime());
@@ -147,6 +147,9 @@ public class TransactionManager {
 		ArrayList<Operation> leftOperations = new ArrayList<Operation>();
 		for(int i = 0; i < pendingOperations.size(); i++) {
 			Operation op = pendingOperations.get(i);
+			if(!transactions.containsKey(op.transactionID)) {
+				continue;
+			}
 			if (transactions.get(op.transactionID).willAbort) {
 				System.out.println("DEBUG: About to abort so ignore this command when execution");
 				continue;
@@ -183,8 +186,6 @@ public class TransactionManager {
 				}
 			}
 		}
-		// TODO: aborted transaction should continue to execute until commit time
-		// TODO: so what it actually does in DM.Fail and DM.Recover and DM.Abort
 	}
 	
 	private void Recover(int siteID) {
@@ -253,7 +254,6 @@ public class TransactionManager {
 					return true;
 				} else {
 					System.out.println("DEBUG: supposed to read after having read lock");
-					//TODO: Suppose to release read lock here
 				}
 			}
 		}
