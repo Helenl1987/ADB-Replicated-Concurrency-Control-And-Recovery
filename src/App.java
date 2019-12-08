@@ -10,7 +10,7 @@ public class App {
 		}
 		TransactionManager TM = new TransactionManager(DM);
 		
-		String filename = "";
+		String filename = "/Users/Helen/Documents/workspacejava/ADB-Replicated-Concurrency-Control-And-Recovery/test/Test3.5";
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(filename));
 			TM.Run(reader);

@@ -22,13 +22,15 @@ public class TransactionManager {
 		for(int i = 1; i <= DataManager.SITECNT; i++) {
 			// suppose all the sites are up at the starting point
 			siteStatus[i] = true;
+		}
+		for(int i = 1; i <= DataManager.VARIABLECNT; i++){
 			ArrayList<Integer> tmp = new ArrayList<Integer>();
 			itemSites.put(i, tmp);
 		}
 		for(int site = 1; site <= DataManager.SITECNT; site++) {
 			for(int var = 1; var <= DataManager.VARIABLECNT; var++) {
 				if((var%2 == 0) || (1+(var%10) == site)) {
-					itemSites.get(site).add(var);
+					itemSites.get(var).add(site);
 				}
 			}
 		}
@@ -59,6 +61,7 @@ public class TransactionManager {
 	
 	private String[] ParseLine(String line) {
 		// first try to get rid of comments (starting with '//')
+		line = line.replaceAll(" ", "");
 		int idx = line.indexOf("//");
 		if (idx != -1) {
 			line = line.substring(0,idx);
@@ -208,8 +211,8 @@ public class TransactionManager {
 	private void Abort(int transactionID) {
 		Transaction ts = transactions.get(transactionID);
 		if(!ts.willAbort) {
-			for(int i=1; i < DM.length; i++) {
-				DM[i].Abort(transactionID);
+			for(int site:ts.visitedSites) {
+				DM[site].Abort(transactionID);
 			}
 			ts.willAbort = true;
 			System.out.println("Debug: abort T"+transactionID);
@@ -227,8 +230,8 @@ public class TransactionManager {
 		if(ts.willAbort) {
 			System.out.println("T"+transactionID+" aborts");
 		} else {
-			for(int i=1; i < DM.length; i++) {
-				DM[i].Commit(transactionID, time);
+			for(int site: ts.visitedSites) {
+				DM[site].Commit(transactionID, time);
 			}
 			System.out.println("T"+transactionID+" commits");
 		}
@@ -264,7 +267,7 @@ public class TransactionManager {
 			}
 			OperationResponse or = DM[siteID].ReadOnly(op);
 			if(or.success) {
-				System.out.printf("x%d: %d", op.variableID, or.readResult);
+				System.out.printf("x%d: %d\n", op.variableID, or.readResult);
 				return true;
 			}
 		}
@@ -296,8 +299,11 @@ public class TransactionManager {
 	
 	private boolean hasCycle(int cur, int root, HashMap<Integer, HashSet<Integer>> graph, HashSet<Integer> path) {
 		path.add(cur);
+		if(!graph.containsKey(cur)){
+			return false;
+		}
 		for(int child:graph.get(cur)) {
-			if(child == cur) {
+			if(child == root) {
 				return true;
 			}
 			if(!path.contains(child)) {
@@ -316,6 +322,9 @@ public class TransactionManager {
 			HashMap<Integer, HashSet<Integer>> graph = DM[i].GenWaitGraph();
 			for(Map.Entry<Integer, HashSet<Integer>> entry: graph.entrySet()) {
 				for(int child:entry.getValue()) {
+					if(!waitGraph.containsKey(entry.getKey())){
+						waitGraph.put(entry.getKey(), new HashSet<Integer>());
+					}
 					waitGraph.get(entry.getKey()).add(child);
 				}
 			}

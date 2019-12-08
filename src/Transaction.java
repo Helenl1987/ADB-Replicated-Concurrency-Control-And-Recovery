@@ -9,6 +9,7 @@ public class Transaction {
 	public Transaction(int st, boolean isRonly) {
 		this.startTime = st;
 		this.isReadOnly = isRonly;
+		this.visitedSites = new HashSet<Integer>();
 	}
 
 	public int getStartTime() {

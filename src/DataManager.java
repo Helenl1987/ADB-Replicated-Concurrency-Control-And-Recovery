@@ -68,8 +68,11 @@ public class DataManager {
 	public DataManager(int siteID) {
 		this.siteID = siteID;
 		this.siteStatus = SiteStatus.UP;
+		this.failureHistory = new ArrayList<Integer>();
+		this.recoveryHistory = new ArrayList<Integer>();
 		this.uncommitted = new TreeMap<Integer, Integer>();
 		this.committed = new TreeMap<Integer, List<CommittedValues>>();
+		this.upToDate = new HashMap<Integer, Boolean>();
 		this.lockTable = new HashMap<Integer, VariableLockNode>();
 		this.transactionsToVariables = new HashMap<Integer, Set<Integer>>();
 		
@@ -112,7 +115,7 @@ public class DataManager {
 	public void DumpAll() {
 		System.out.printf("site %d - ", this.siteID);
 		for (Map.Entry<Integer, List<CommittedValues>> entry: this.committed.entrySet()) {
-			System.out.printf("x%d: %d, ", entry.getKey(), entry.getValue().get(0));
+			System.out.printf("x%d: %d, ", entry.getKey(), entry.getValue().get(0).value);
 		}
 		System.out.printf("\n");
 	}
@@ -166,6 +169,9 @@ public class DataManager {
 	}
 	
 	private boolean WriteLockCheck(int transactionID, int variableID) {
+		if (this.lockTable.containsKey(variableID) == false) {
+			return true;
+		}
 		VariableLockNode vln = this.lockTable.get(variableID);
 		if (vln.transactionIDs.contains(transactionID) && vln.lockType == LockType.WRITE) {
 			return true;
@@ -261,8 +267,8 @@ public class DataManager {
 			grantLock = false;
 			for (Map.Entry<Integer, VariableLockNode> entry: this.lockTable.entrySet()) {
 				VariableLockNode vln = entry.getValue();
-				TransactionLockNode tln = entry.getValue().waitlist.get(0);
 				if (vln.waitlist.isEmpty() == false) {
+					TransactionLockNode tln = entry.getValue().waitlist.get(0);
 					if (tln.lockType == LockType.READ) {
 						if (vln.lockType == LockType.IDLE || vln.lockType == LockType.READ || vln.transactionIDs.contains(tln.transactionID)) {
 							grantLock = true;
@@ -291,11 +297,13 @@ public class DataManager {
 	}
 	
 	public void Commit(int transactionID, int timestamp) {
-		for (int variableID: this.transactionsToVariables.get(transactionID)) {
-			this.committed.get(variableID).add(new CommittedValues(this.uncommitted.get(variableID), timestamp));
-			this.upToDate.put(variableID, true);
+		if (this.transactionsToVariables.containsKey(transactionID)) {
+			for (int variableID: this.transactionsToVariables.get(transactionID)) {
+				this.committed.get(variableID).add(0, new CommittedValues(this.uncommitted.get(variableID), timestamp));
+				this.upToDate.put(variableID, true);
+			}
+			this.transactionsToVariables.remove(transactionID);
 		}
-		this.transactionsToVariables.remove(transactionID);
 		
 		for (Map.Entry<Integer, VariableLockNode> entry: this.lockTable.entrySet()) {
 			if (entry.getValue().transactionIDs.contains(transactionID)) {
@@ -314,10 +322,12 @@ public class DataManager {
 	}
 	
 	public void Abort(int transactionID) {
-		for (int variableID: this.transactionsToVariables.get(transactionID)) {
-			this.uncommitted.put(variableID, this.committed.get(variableID).get(0).value);
+		if (this.transactionsToVariables.containsKey(transactionID)) {
+			for (int variableID: this.transactionsToVariables.get(transactionID)) {
+				this.uncommitted.put(variableID, this.committed.get(variableID).get(0).value);
+			}
+			this.transactionsToVariables.remove(transactionID);
 		}
-		this.transactionsToVariables.remove(transactionID);
 		
 		for (Map.Entry<Integer, VariableLockNode> entry: this.lockTable.entrySet()) {
 			if (entry.getValue().transactionIDs.contains(transactionID)) {
