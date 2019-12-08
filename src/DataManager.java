@@ -2,6 +2,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
@@ -308,9 +309,10 @@ public class DataManager {
 		for (Map.Entry<Integer, VariableLockNode> entry: this.lockTable.entrySet()) {
 			if (entry.getValue().transactionIDs.contains(transactionID)) {
 				entry.getValue().transactionIDs.remove(transactionID);
-				for (TransactionLockNode tln: entry.getValue().waitlist) {
-					if (tln.transactionID == transactionID) {
-						entry.getValue().waitlist.remove(tln);
+				ListIterator<TransactionLockNode> iter = entry.getValue().waitlist.listIterator();
+				while (iter.hasNext()) {
+					if (iter.next().transactionID == transactionID) {
+						iter.remove();
 					}
 				}
 				if (entry.getValue().transactionIDs.size() == 0) {
@@ -332,9 +334,10 @@ public class DataManager {
 		for (Map.Entry<Integer, VariableLockNode> entry: this.lockTable.entrySet()) {
 			if (entry.getValue().transactionIDs.contains(transactionID)) {
 				entry.getValue().transactionIDs.remove(transactionID);
-				for (TransactionLockNode tln: entry.getValue().waitlist) {
-					if (tln.transactionID == transactionID) {
-						entry.getValue().waitlist.remove(tln);
+				ListIterator<TransactionLockNode> iter = entry.getValue().waitlist.listIterator();
+				while (iter.hasNext()) {
+					if (iter.next().transactionID == transactionID) {
+						iter.remove();
 					}
 				}
 				if (entry.getValue().transactionIDs.size() == 0) {
