@@ -139,7 +139,7 @@ public class TransactionManager {
 			Operation op = new Operation(transactionID, variableID, Operation.OperationType.WRITE, value, curTrans.getStartTime());
 			pendingOperations.add(op);
 		} else {
-			System.out.println("DEBUG: Invalid command name");
+			//System.out.println("DEBUG: Invalid command name");
 		}
 	}
 	
@@ -151,7 +151,7 @@ public class TransactionManager {
 				continue;
 			}
 			if (transactions.get(op.transactionID).willAbort) {
-				System.out.println("DEBUG: About to abort so ignore this command when execution");
+				//System.out.println("DEBUG: About to abort so ignore this command when execution");
 				continue;
 			}
 			if(op.operationType == Operation.OperationType.READ) {
@@ -216,7 +216,7 @@ public class TransactionManager {
 				DM[site].Abort(transactionID);
 			}
 			ts.willAbort = true;
-			System.out.println("Debug: abort T"+transactionID);
+			//System.out.println("Debug: abort T"+transactionID);
 		}
 	}
 	
@@ -253,7 +253,7 @@ public class TransactionManager {
 					System.out.printf("x%d: %d\n", op.variableID, or.readResult);
 					return true;
 				} else {
-					System.out.println("DEBUG: supposed to read after having read lock");
+					//System.out.println("DEBUG: supposed to read after having read lock");
 				}
 			}
 		}
