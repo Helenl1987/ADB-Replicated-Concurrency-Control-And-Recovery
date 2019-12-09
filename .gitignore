@@ -1,1 +1,10 @@
 /bin/
+adb.jar
+pack2/
+repro-pack.rpz
+repro-pack2.rpz
+repro/
+*.rpz
+test/Output*
+test/Result*
+
