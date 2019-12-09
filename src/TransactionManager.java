@@ -1,4 +1,5 @@
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -81,16 +82,21 @@ public class TransactionManager {
 	private HashMap<Integer, Transaction> transactions; // TransactionID begins from 1
 	private HashMap<Integer, ArrayList<Integer>> itemSites;
 	private ArrayList<Operation> pendingOperations;
+	public boolean writeToFile;
+	public BufferedWriter writer;
 	
-	public TransactionManager(DataManager[] _DM) {
+	public TransactionManager(DataManager[] _DM, BufferedWriter writer) {
 		this.time = 0;
 		this.DM = _DM;
+		this.writer = writer;
 		transactions = new HashMap<Integer, Transaction>();
 		itemSites = new HashMap<Integer, ArrayList<Integer>>();
 		pendingOperations = new ArrayList<Operation>();
+		writeToFile = false;
 		for(int i = 1; i <= DataManager.SITECNT; i++) {
 			// suppose all the sites are up at the starting point
 			siteStatus[i] = true;
+			DM[i].writer = writer;
 		}
 		for(int i = 1; i <= DataManager.VARIABLECNT; i++){
 			ArrayList<Integer> tmp = new ArrayList<Integer>();
@@ -298,12 +304,19 @@ public class TransactionManager {
 	private void Finish(int transactionID) {
 		Transaction ts = transactions.get(transactionID);
 		if(ts.willAbort) {
-			System.out.println("T"+transactionID+" aborts");
+			try {
+				this.writer.write("T"+transactionID+" aborts");
+				this.writer.newLine();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 		} else {
 			for(int site: ts.visitedSites) {
 				DM[site].Commit(transactionID, time);
 			}
-			System.out.println("T"+transactionID+" commits");
+			//System.out.println("T"+transactionID+" commits");
+			writeLine("T"+transactionID+" commits");
 		}
 		transactions.remove(transactionID);
 	}
@@ -319,7 +332,8 @@ public class TransactionManager {
 				OperationResponse or = DM[siteID].Read(op);
 				if(or.success) {
 					transactions.get(transactionID).visitedSites.add(siteID);
-					System.out.printf("x%d: %d\n", op.variableID, or.readResult);
+					//System.out.printf("x%d: %d\n", op.variableID, or.readResult);
+					writeLine(String.format("x%d: %d", op.variableID, or.readResult));
 					return true;
 				} else {
 					//System.out.println("DEBUG: supposed to read after having read lock");
@@ -336,7 +350,8 @@ public class TransactionManager {
 			}
 			OperationResponse or = DM[siteID].ReadOnly(op);
 			if(or.success) {
-				System.out.printf("x%d: %d\n", op.variableID, or.readResult);
+				//System.out.printf("x%d: %d\n", op.variableID, or.readResult);
+				writeLine(String.format("x%d: %d", op.variableID, or.readResult));
 				return true;
 			}
 		}
@@ -422,5 +437,16 @@ public class TransactionManager {
 		}
 		
 		return false;
+	}
+	
+	private void writeLine(String line) {
+		try {
+			this.writer.write(line);
+			this.writer.newLine();
+			this.writer.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

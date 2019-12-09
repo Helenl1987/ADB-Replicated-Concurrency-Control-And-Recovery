@@ -1,3 +1,5 @@
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -144,7 +146,7 @@ public class DataManager {
 	public SiteStatus siteStatus;
 	public List<Integer> failureHistory;
 	public List<Integer> recoveryHistory;
-	
+	public BufferedWriter writer;
 	private TreeMap<Integer, Integer> uncommitted;
 	private TreeMap<Integer, List<CommittedValues>> committed;
 	private HashMap<Integer, Boolean> upToDate;
@@ -200,15 +202,15 @@ public class DataManager {
 	}
 	
 	public void DumpAll() {
-		System.out.printf("site %d - ", this.siteID);
+		writeLine(String.format("site %d - ", this.siteID));
 		for (Map.Entry<Integer, List<CommittedValues>> entry: this.committed.entrySet()) {
-			System.out.printf("x%d: %d, ", entry.getKey(), entry.getValue().get(0).value);
+			writeLine(String.format("x%d: %d, ", entry.getKey(), entry.getValue().get(0).value));
 		}
-		System.out.printf("\n");
+		writeLine(String.format("\n"));
 	}
 	
 	public void DumpOne(int variableID) {
-		System.out.printf("site %d - x%d: %d\n", this.siteID, this.committed.get(variableID).get(0));
+		writeLine(String.format("site %d - x%d: %d\n", this.siteID, this.committed.get(variableID).get(0)));
 	}
 	
 	private boolean ReadLockCheck(int transactionID, int variableID) {
@@ -299,7 +301,7 @@ public class DataManager {
 			return new OperationResponse(false);
 		}
 		if (this.lockTable.containsKey(operation.variableID) == false || this.lockTable.get(operation.variableID).transactionIDs.contains(operation.transactionID) == false) {
-			System.out.printf("Error: transaction performs read before acquiring read locks\n");
+			writeLine(String.format("Error: transaction performs read before acquiring read locks\n"));
 			return new OperationResponse(false);
 		}
 		else {
@@ -312,7 +314,7 @@ public class DataManager {
 	public OperationResponse Write(Operation operation) {
 		if (this.lockTable.containsKey(operation.variableID) == false || this.lockTable.get(operation.variableID).lockType != LockType.WRITE 
 				|| this.lockTable.get(operation.variableID).transactionIDs.contains(operation.transactionID) == false) {
-			System.out.printf("Error: transaction performs write before acquiring write locks\n");
+			writeLine(String.format("Error: transaction performs write before acquiring write locks\n"));
 			return new OperationResponse(false);
 		}
 		else {
@@ -496,6 +498,16 @@ public class DataManager {
 			}
 		}
 		return waitGraph;
+	}
+	
+	private void writeLine(String line) {
+		try {
+			this.writer.write(line);
+			this.writer.flush();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }
 
